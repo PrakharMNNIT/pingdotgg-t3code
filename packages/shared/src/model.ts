@@ -1,17 +1,21 @@
 import {
+  BEDROCK_REASONING_EFFORT_OPTIONS,
   CODEX_REASONING_EFFORT_OPTIONS,
   DEFAULT_MODEL_BY_PROVIDER,
+  DEFAULT_REASONING_EFFORT_BY_PROVIDER,
   MODEL_OPTIONS_BY_PROVIDER,
   MODEL_SLUG_ALIASES_BY_PROVIDER,
-  type CodexReasoningEffort,
+  REASONING_EFFORT_OPTIONS_BY_PROVIDER,
   type ModelSlug,
   type ProviderKind,
+  type ReasoningEffort,
 } from "@t3tools/contracts";
 
 type CatalogProvider = keyof typeof MODEL_OPTIONS_BY_PROVIDER;
 
 const MODEL_SLUG_SET_BY_PROVIDER: Record<CatalogProvider, ReadonlySet<ModelSlug>> = {
-  codex: new Set(MODEL_OPTIONS_BY_PROVIDER.codex.map((option) => option.slug)),
+  codex: new Set(MODEL_OPTIONS_BY_PROVIDER.codex.map((o) => o.slug)),
+  bedrock: new Set(MODEL_OPTIONS_BY_PROVIDER.bedrock.map((o) => o.slug)),
 };
 
 export function getModelOptions(provider: ProviderKind = "codex") {
@@ -26,15 +30,9 @@ export function normalizeModelSlug(
   model: string | null | undefined,
   provider: ProviderKind = "codex",
 ): ModelSlug | null {
-  if (typeof model !== "string") {
-    return null;
-  }
-
+  if (typeof model !== "string") return null;
   const trimmed = model.trim();
-  if (!trimmed) {
-    return null;
-  }
-
+  if (!trimmed) return null;
   const aliases = MODEL_SLUG_ALIASES_BY_PROVIDER[provider] as Record<string, ModelSlug>;
   const aliased = aliases[trimmed];
   return typeof aliased === "string" ? aliased : (trimmed as ModelSlug);
@@ -45,10 +43,7 @@ export function resolveModelSlug(
   provider: ProviderKind = "codex",
 ): ModelSlug {
   const normalized = normalizeModelSlug(model, provider);
-  if (!normalized) {
-    return getDefaultModel(provider);
-  }
-
+  if (!normalized) return getDefaultModel(provider);
   return MODEL_SLUG_SET_BY_PROVIDER[provider].has(normalized)
     ? normalized
     : getDefaultModel(provider);
@@ -63,16 +58,15 @@ export function resolveModelSlugForProvider(
 
 export function getReasoningEffortOptions(
   provider: ProviderKind = "codex",
-): ReadonlyArray<CodexReasoningEffort> {
-  return provider === "codex" ? CODEX_REASONING_EFFORT_OPTIONS : [];
+): ReadonlyArray<ReasoningEffort> {
+  return REASONING_EFFORT_OPTIONS_BY_PROVIDER[provider];
 }
 
-export function getDefaultReasoningEffort(provider: "codex"): CodexReasoningEffort;
-export function getDefaultReasoningEffort(provider: ProviderKind): CodexReasoningEffort | null;
-export function getDefaultReasoningEffort(
-  provider: ProviderKind = "codex",
-): CodexReasoningEffort | null {
-  return provider === "codex" ? "high" : null;
+export function getDefaultReasoningEffort(provider: "codex"): ReasoningEffort;
+export function getDefaultReasoningEffort(provider: "bedrock"): ReasoningEffort;
+export function getDefaultReasoningEffort(provider: ProviderKind): ReasoningEffort | null;
+export function getDefaultReasoningEffort(provider: ProviderKind = "codex"): ReasoningEffort | null {
+  return DEFAULT_REASONING_EFFORT_BY_PROVIDER[provider];
 }
 
-export { CODEX_REASONING_EFFORT_OPTIONS };
+export { CODEX_REASONING_EFFORT_OPTIONS, BEDROCK_REASONING_EFFORT_OPTIONS };
