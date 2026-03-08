@@ -16,6 +16,7 @@ import {
   type ProviderAdapterRegistryShape,
 } from "../Services/ProviderAdapterRegistry.ts";
 import { CodexAdapter } from "../Services/CodexAdapter.ts";
+import { BedrockAdapter } from "../Services/BedrockAdapter.ts";
 
 export interface ProviderAdapterRegistryLiveOptions {
   readonly adapters?: ReadonlyArray<ProviderAdapterShape<ProviderAdapterError>>;
@@ -23,10 +24,11 @@ export interface ProviderAdapterRegistryLiveOptions {
 
 const makeProviderAdapterRegistry = (options?: ProviderAdapterRegistryLiveOptions) =>
   Effect.gen(function* () {
-    const adapters =
-      options?.adapters !== undefined
-        ? options.adapters
-        : [yield* CodexAdapter];
+    const defaults: ProviderAdapterShape<ProviderAdapterError>[] = [yield* CodexAdapter];
+    // BedrockAdapter is optional — only registered if its layer is provided
+    const bedrock = yield* Effect.serviceOption(BedrockAdapter);
+    if (bedrock._tag === "Some") defaults.push(bedrock.value);
+    const adapters = options?.adapters ?? defaults;
     const byProvider = new Map(adapters.map((adapter) => [adapter.provider, adapter]));
 
     const getByProvider: ProviderAdapterRegistryShape["getByProvider"] = (provider) => {
