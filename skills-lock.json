@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "skills": {
+    "constellation-team": {
+      "source": "prakharmnnit/skills-and-personas",
+      "sourceType": "github",
+      "computedHash": "0a08b03b0babde392ef632435832bfb3927cbed5032410d24c0032749f5477be"
+    }
+  }
+}
