@@ -16,3 +16,12 @@ release/
 apps/web/.playwright
 apps/web/playwright-report
 apps/web/src/components/__screenshots__
+
+# Agent skill files (local-only, not part of project)
+.agent/
+.agents/
+.claude/
+.junie/
+.kilocode/
+.roo/
+skills-lock.json

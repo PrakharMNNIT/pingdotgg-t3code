@@ -67,6 +67,8 @@ async function edit(args: { path: string; old_text: string; new_text: string }, 
   const start = Date.now();
   try {
     const resolved = sandbox.validate(args.path, cfg.root);
+    const stat = fs.statSync(resolved);
+    if (stat.size > MAX_FILE_BYTES) return { output: `File too large to edit: ${args.path} (${stat.size} bytes)`, error: true, duration: Date.now() - start };
     const content = fs.readFileSync(resolved, "utf-8");
     const idx = content.indexOf(args.old_text);
     if (idx === -1) return { output: `Text not found in ${args.path}`, error: true, duration: Date.now() - start };
